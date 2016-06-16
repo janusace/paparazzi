@@ -41,10 +41,7 @@ extern volatile uint8_t new_ins_attitude;
 extern float ins_pitch_neutral;
 extern float ins_roll_neutral;
 
-#define DefaultInsImpl ins_xsens700
-
 extern void ins_xsens700_init(void);
-extern void ins_xsens700_register(void);
 extern void ins_xsens700_event(void);
 
 #if USE_GPS_XSENS

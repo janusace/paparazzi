@@ -134,12 +134,14 @@ static void baro_cb(uint8_t sender_id, float pressure);
 #ifndef INS_INT_IMU_ID
 #define INS_INT_IMU_ID ABI_BROADCAST
 #endif
+static abi_event accel_ev;
+static void accel_cb(uint8_t sender_id, uint32_t stamp, struct Int32Vect3 *accel);
+
 #ifndef INS_INT_GPS_ID
 #define INS_INT_GPS_ID GPS_MULTI_ID
 #endif
-static abi_event accel_ev;
 static abi_event gps_ev;
-
+static void gps_cb(uint8_t sender_id, uint32_t stamp, struct GpsState *gps_s);
 
 /** ABI binding for VELOCITY_ESTIMATE.
  * Usually this is coming from opticflow.
@@ -228,6 +230,13 @@ void ins_int_init(void)
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_INS_Z, send_ins_z);
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_INS_REF, send_ins_ref);
 #endif
+
+  /*
+   * Subscribe to scaled IMU measurements and attach callbacks
+   */
+  AbiBindMsgIMU_ACCEL_INT32(INS_INT_IMU_ID, &accel_ev, accel_cb);
+  AbiBindMsgGPS(INS_INT_GPS_ID, &gps_ev, gps_cb);
+  AbiBindMsgVELOCITY_ESTIMATE(INS_INT_VEL_ID, &vel_est_ev, vel_est_cb);
 }
 
 void ins_reset_local_origin(void)
@@ -548,16 +557,4 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 
   /* reset the counter to indicate we just had a measurement update */
   ins_int.propagation_cnt = 0;
-}
-
-void ins_int_register(void)
-{
-  ins_register_impl(ins_int_init);
-
-  /*
-   * Subscribe to scaled IMU measurements and attach callbacks
-   */
-  AbiBindMsgIMU_ACCEL_INT32(INS_INT_IMU_ID, &accel_ev, accel_cb);
-  AbiBindMsgGPS(INS_INT_GPS_ID, &gps_ev, gps_cb);
-  AbiBindMsgVELOCITY_ESTIMATE(INS_INT_VEL_ID, &vel_est_ev, vel_est_cb);
 }

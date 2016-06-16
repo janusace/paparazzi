@@ -11,8 +11,7 @@
   <header>
     <file name="ins_xsens.h"/>
   </header>
-  <!-- ins_init is still called explicitly in main -->
-  <!--init fun="ins_init()"/-->
+  <init fun="ins_xsens_init()"/>
   <periodic fun="xsens_periodic()" freq="60"/>
   <event fun="ins_xsens_event()"/>
   <makefile target="ap">
@@ -44,7 +43,7 @@
 
     <file name="ins.c" dir="subsystems"/>
     <file name="ins_gps_passthrough_utm.c" dir="subsystems/ins"/>
-    <define name="INS_TYPE_H" value="subsystems/ins/ins_gps_passthrough_utm.h" type="string"/>
+    <define name="INS_TYPE_H" value="subsystems/ins/ins_gps_passthrough.h" type="string"/>
 
     <file name="gps.c" dir="subsystems"/>
     <file name="gps_sim.c" dir="subsystems/gps"/>
@@ -60,7 +59,7 @@
 
     <file name="ins.c" dir="subsystems"/>
     <file name="ins_gps_passthrough_utm.c" dir="subsystems/ins"/>
-    <define name="INS_TYPE_H" value="subsystems/ins/ins_gps_passthrough_utm.h" type="string"/>
+    <define name="INS_TYPE_H" value="subsystems/ins/ins_gps_passthrough.h" type="string"/>
 
     <file name="gps.c" dir="subsystems"/>
     <file name="gps_sim_nps.c" dir="subsystems/gps"/>

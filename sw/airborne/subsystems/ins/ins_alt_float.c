@@ -84,12 +84,17 @@ static void baro_cb(uint8_t sender_id, float pressure);
 #endif
 PRINT_CONFIG_VAR(INS_ALT_GPS_ID)
 static abi_event gps_ev;
-static abi_event accel_ev;
-static abi_event body_to_imu_ev;
-static struct OrientationReps body_to_imu;
+static void gps_cb(uint8_t sender_id, uint32_t stamp, struct GpsState *gps_s);
+
 #ifndef INS_ALT_IMU_ID
 #define INS_ALT_IMU_ID ABI_BROADCAST
 #endif
+static abi_event accel_ev;
+static void accel_cb(uint8_t sender_id, uint32_t stamp, struct Int32Vect3 *accel);
+
+static abi_event body_to_imu_ev;
+static void body_to_imu_cb(uint8_t sender_id, struct FloatQuat *q_b2i_f);
+static struct OrientationReps body_to_imu;
 
 static void alt_kalman_reset(void);
 static void alt_kalman_init(void);
@@ -124,6 +129,14 @@ void ins_alt_float_init(void)
 
   // why do we have this here?
   alt_kalman(0.0f, 0.1);
+
+#if USE_BAROMETER
+  // Bind to BARO_ABS message
+  AbiBindMsgBARO_ABS(INS_BARO_ID, &baro_ev, baro_cb);
+#endif
+  AbiBindMsgGPS(INS_ALT_GPS_ID, &gps_ev, gps_cb);
+  AbiBindMsgIMU_ACCEL_INT32(INS_ALT_IMU_ID, &accel_ev, accel_cb);
+  AbiBindMsgBODY_TO_IMU_QUAT(INS_ALT_IMU_ID, &body_to_imu_ev, body_to_imu_cb);
 }
 
 /** Reset the geographic reference to the current GPS fix */
@@ -381,17 +394,4 @@ static void body_to_imu_cb(uint8_t sender_id __attribute__((unused)),
                            struct FloatQuat *q_b2i_f)
 {
   orientationSetQuat_f(&body_to_imu, q_b2i_f);
-}
-
-void ins_altf_register(void)
-{
-  ins_register_impl(ins_alt_float_init);
-
-#if USE_BAROMETER
-  // Bind to BARO_ABS message
-  AbiBindMsgBARO_ABS(INS_BARO_ID, &baro_ev, baro_cb);
-#endif
-  AbiBindMsgGPS(INS_ALT_GPS_ID, &gps_ev, gps_cb);
-  AbiBindMsgIMU_ACCEL_INT32(INS_ALT_IMU_ID, &accel_ev, accel_cb);
-  AbiBindMsgBODY_TO_IMU_QUAT(INS_ALT_IMU_ID, &body_to_imu_ev, body_to_imu_cb);
 }
